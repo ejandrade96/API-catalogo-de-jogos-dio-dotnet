@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DIO.CatalogoJogos.Api.Repositorios;
+using DIO.CatalogoJogos.Api.Servicos;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -32,6 +34,10 @@ namespace DIO.CatalogoJogos.Api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "DIO.CatalogoJogos.Api", Version = "v1" });
             });
+            services.AddAutoMapper(typeof(Mapeamentos.Produtora));
+            
+            services.AddTransient<IProdutora, Produtora>();
+            services.AddTransient<IProdutoras, Produtoras>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DIO.CatalogoJogos.Api.Servicos;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,52 +11,61 @@ namespace DIO.CatalogoJogos.Api.Controllers
   [ApiController]
   public class Produtoras : ControllerBase
   {
-    [HttpPost]
-    public async Task<ActionResult<DTOs.Produtora>> Post([FromBody] DTOs.ProdutoraInputModel produtora)
+    private readonly IProdutora _servico;
+    
+    public Produtoras(IProdutora servico)
     {
-      var produtoraCadastrada = new DTOs.Produtora { Id = Guid.NewGuid(), Nome = produtora.Nome };
+      _servico = servico;
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<DTOs.Produtora>> Inserir([FromBody] DTOs.ProdutoraInputModel dadosProdutora)
+    {
+      var produtora = await _servico.Inserir(dadosProdutora);
 
       return Created(
-        new Uri(HttpContext.Request.GetDisplayUrl()).GetLeftPart(UriPartial.Authority) + $"/api/V1/produtoras/{produtoraCadastrada.Id}",
-        produtoraCadastrada);
+        new Uri(HttpContext.Request.GetDisplayUrl()).GetLeftPart(UriPartial.Authority) + $"/api/V1/produtoras/{produtora.Id}",
+        produtora);
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<DTOs.Produtora>>> Get()
+    public async Task<ActionResult<List<DTOs.Produtora>>> Listar()
     {
-      var produtoras = new List<DTOs.Produtora>
-      {
-        new DTOs.Produtora { Id = Guid.NewGuid(), Nome = "Konami" },
-        new DTOs.Produtora { Id = Guid.NewGuid(), Nome = "EA Sports" }
-      };
+      var produtoras = await _servico.Listar();
 
       return Ok(produtoras);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<DTOs.Produtora>> GetById(Guid id)
+    public async Task<ActionResult<DTOs.Produtora>> ObterPorId(Guid id)
     {
-      if (id == Guid.Parse("9A1DCF8D-034C-4EE1-82D2-2D6735B223EA"))
-        return StatusCode(404, new { Mensagem = "Produtora não encontrado(a)!" });
+      var resposta = await _servico.ObterPorId(id);
 
-      return Ok(new DTOs.Produtora { Id = Guid.NewGuid(), Nome = "Konami" });
+      if (resposta.TemErro())
+        return StatusCode(resposta.Erro.StatusCode, new { Mensagem = resposta.Erro.Mensagem });
+
+      return Ok(resposta.Resultado);
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult> Put(Guid id, [FromBody] DTOs.ProdutoraInputModel produtora)
+    public async Task<ActionResult> Atualizar(Guid id, [FromBody] DTOs.ProdutoraInputModel dadosProdutora)
     {
-      if (id == Guid.Parse("9A1DCF8D-034C-4EE1-82D2-2D6735B223EA"))
-        return StatusCode(404, new { Mensagem = "Produtora não encontrado(a)!" });
+      var resposta = await _servico.Atualizar(id, dadosProdutora);
+
+      if (resposta.TemErro())
+        return StatusCode(resposta.Erro.StatusCode, new { Mensagem = resposta.Erro.Mensagem });
 
       return NoContent();
     }
 
 
     [HttpDelete("{id:guid}")]
-    public async Task<ActionResult> Delete(Guid id)
+    public async Task<ActionResult> Remover(Guid id)
     {
-      if (id == Guid.Parse("9A1DCF8D-034C-4EE1-82D2-2D6735B223EA"))
-        return StatusCode(404, new { Mensagem = "Produtora não encontrado(a)!" });
+      var resposta = await _servico.Remover(id);
+
+      if (resposta.TemErro())
+        return StatusCode(resposta.Erro.StatusCode, new { Mensagem = resposta.Erro.Mensagem });
 
       return NoContent();
     }
