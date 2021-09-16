@@ -16,6 +16,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="5.0.9"/>
     <PackageReference Include="FluentAssertions" Version="5.10.3"/>
+    <PackageReference Include="Moq" Version="4.16.1"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DIO.CatalogoJogos.Api\DIO.CatalogoJogos.Api.csproj"/>
