@@ -1,38 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Newtonsoft.Json;
 using Xunit;
 
-namespace DIO.CatalogoJogos.Api.Testes.Integracao
+namespace DIO.CatalogoJogos.Testes.Integracao
 {
-  public class Produtora
+  public class Produtora : IntegracaoBase
   {
-    private HttpClient _api;
-
-    public Produtora()
-    {
-      var appFactory = new WebApplicationFactory<Startup>()
-           .WithWebHostBuilder(builder =>
-           {
-             builder.ConfigureServices(services =>
-             {
-             });
-           });
-
-      _api = appFactory.CreateClient();
-
-    }
-
-    private HttpContent ConverterParaJSON<T>(T valor) => new StringContent(JsonConvert.SerializeObject(valor), Encoding.UTF8, "application/json");
-
-    private T Converter<T>(string json) => JsonConvert.DeserializeObject<T>(json);
-
     [Fact]
     public async Task Deve_Cadastrar_Uma_Produtora_Quando_Enviar_Dados_Certos()
     {

@@ -1,11 +1,7 @@
-using System;
-
 namespace DIO.CatalogoJogos.Api.Modelos
 {
-  public class Produtora
+  public class Produtora : EntidadeBase
   {
-    public Guid Id { get; set; }
-
     public string Nome { get; private set; }
 
     public Produtora(string nome)
