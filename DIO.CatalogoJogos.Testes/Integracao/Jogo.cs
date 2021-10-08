@@ -42,7 +42,7 @@ namespace DIO.CatalogoJogos.Testes.Integracao
       var retorno = await _api.PostAsync("/api/V1/produtoras/9A1DCF8D-034C-4EE1-82D2-2D6735B223EA/jogos", ConverterParaJSON<Object>(jogo));
       var erroEmJson = await retorno.Content.ReadAsStringAsync();
       var erro = Converter<Dictionary<string, string>>(erroEmJson);
-      
+
       retorno.StatusCode.Should().Be(HttpStatusCode.NotFound);
       retorno.StatusCode.Should().Be(404);
       erro["mensagem"].Should().Be("Produtora não encontrado(a)!");
@@ -89,18 +89,70 @@ namespace DIO.CatalogoJogos.Testes.Integracao
     }
 
     [Fact]
-    public async Task Deve_Listar_Todos_Os_Jogos_De_Uma_Produtora()
+    public async Task Deve_Listar_Os_Jogos_Cadastrados_De_Uma_Produtora()
     {
+      var retorno = await _api.GetAsync("/api/V1/produtoras/C8133002-F17A-465D-905B-F2EA6B69AF9B/jogos?pagina=1&quantidade=3");
+      var jogosEmJson = await retorno.Content.ReadAsStringAsync();
+      var jogos = Converter<List<Dictionary<string, object>>>(jogosEmJson);
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.OK);
+      jogos.Should().HaveCount(3);
+      jogos.ForEach((jogo) =>
+      {
+        jogo.Should().ContainKey("id");
+        jogo.Should().ContainKey("nome");
+        jogo["id"].ToString().Should().NotBeNullOrWhiteSpace();
+        jogo["id"].ToString().ToCharArray().Should().HaveCount(36);
+        jogo["nome"].ToString().Should().NotBeNullOrWhiteSpace();
+        jogo["preco"].ToString().Should().NotBeNullOrWhiteSpace();
+        jogo["categoria"].ToString().Should().NotBeNullOrWhiteSpace();
+      });
     }
 
     [Fact]
-    public async Task Deve_Notificar_O_Usuario_Quando_Tentar_Listar_Todos_Os_Jogos_De_Uma_Produtora_Inexistente()
+    public async Task Deve_Notificar_O_Usuario_Quando_Tentar_Listar_Os_Jogos_De_Uma_Produtora_Inexistente()
     {
+      var retorno = await _api.GetAsync("/api/V1/produtoras/9A1DCF8D-034C-4EE1-82D2-2D6735B223EA/jogos");
+      var erroEmJson = await retorno.Content.ReadAsStringAsync();
+      var erro = Converter<Dictionary<string, string>>(erroEmJson);
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.NotFound);
+      retorno.StatusCode.Should().Be(404);
+      erro["mensagem"].Should().Be("Produtora não encontrado(a)!");
     }
 
     [Fact]
-    public async Task Deve_Listar_Todos_Os_Jogos()
+    public async Task Deve_Listar_Os_Jogos_Cadastrados()
     {
+      var retorno = await _api.GetAsync("/api/V1/jogos?pagina=1&quantidade=3");
+      var jogosEmJson = await retorno.Content.ReadAsStringAsync();
+      var jogos = Converter<List<Dictionary<string, object>>>(jogosEmJson);
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.OK);
+      jogos.Should().HaveCount(3);
+      jogos.ForEach((jogo) =>
+      {
+        jogo.Should().ContainKey("id");
+        jogo.Should().ContainKey("nome");
+        jogo["id"].ToString().Should().NotBeNullOrWhiteSpace();
+        jogo["id"].ToString().ToCharArray().Should().HaveCount(36);
+        jogo["nome"].ToString().Should().NotBeNullOrWhiteSpace();
+        jogo["preco"].ToString().Should().NotBeNullOrWhiteSpace();
+        jogo["categoria"].ToString().Should().NotBeNullOrWhiteSpace();
+      });
+    }
+
+    [Fact]
+    public async Task Deve_Notificar_O_Usuario_Quando_Tentar_Listar_Mais_De_50_Jogos_Cadastrados_Por_Pagina()
+    {
+      var retorno = await _api.GetAsync("/api/V1/jogos?pagina=1&quantidade=51");
+      var mensagemEmJson = await retorno.Content.ReadAsStringAsync();
+      var mensagem = Converter<Dictionary<string, object>>(mensagemEmJson);
+      var errosEmJson = mensagem["errors"].ToString();
+      var erros = Converter<Dictionary<string, string[]>>(errosEmJson)["quantidade"];
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+      erros[0].Should().Be("O limite máximo deve ser de 50 jogos por página.");
     }
 
     [Fact]
