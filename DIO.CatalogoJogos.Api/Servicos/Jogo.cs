@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using DIO.CatalogoJogos.Api.DTOs;
@@ -48,6 +49,31 @@ namespace DIO.CatalogoJogos.Api.Servicos
         resposta.Resultado = _mapper.Map<DTOs.Jogo>(jogoCadastrado);
       }
 
+      return resposta;
+    }
+
+    public async Task<IResposta<List<DTOs.Jogo>>> Listar(int pagina, int quantidade, Guid? produtoraId)
+    {
+      IResposta<List<DTOs.Jogo>> resposta = new Resposta<List<DTOs.Jogo>>();
+      var jogos = new List<Modelos.Jogo>();
+
+      if (produtoraId != Guid.Empty)
+      {
+        var produtora = await _produtoras.ObterPorId(produtoraId.Value);
+
+        if (produtora == null)
+        {
+          resposta.Erro = new ErroObjetoNaoEncontrado("Produtora");
+          return resposta;
+        }
+
+        jogos = await _jogos.Listar(pagina, quantidade, produtoraId.Value);
+      }
+
+      else
+        jogos = await _jogos.Listar(pagina, quantidade, Guid.Empty);
+
+      resposta.Resultado = _mapper.Map<List<DTOs.Jogo>>(jogos);
       return resposta;
     }
 
