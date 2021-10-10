@@ -14,7 +14,7 @@ namespace DIO.CatalogoJogos.Testes.Integracao
     {
       var jogo = new
       {
-        Nome = "FIFA 22",
+        Nome = "FIFA 25",
         Preco = 288.29,
         Categoria = "Esportes"
       };
@@ -191,21 +191,75 @@ namespace DIO.CatalogoJogos.Testes.Integracao
     [Fact]
     public async Task Deve_Atualizar_Um_Jogo_Quando_Enviar_Dados_Certos()
     {
+      var jogo = new
+      {
+        Nome = "FIFA 23",
+        Preco = 352.21,
+        Categoria = "Esportes"
+      };
+
+      var retorno = await _api.PutAsync("/api/V1/jogos/A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9", ConverterParaJSON<Object>(jogo));
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact]
-    public async Task Deve_Notificar_O_Usuario_Quando_Tentar_Atualizar_Um_Jogo_Com_Nome_Ja_Existente_Na_Mesma_Produtora()
+    public async Task Deve_Notificar_O_Usuario_Quando_Tentar_Atualizar_Um_Jogo_Inexistente()
     {
+      var jogo = new
+      {
+        Nome = "FIFA 23",
+        Preco = 352.21,
+        Categoria = "Esportes"
+      };
+
+      var retorno = await _api.PutAsync("/api/V1/jogos/39D40DA2-3DD9-4A0C-9BE0-F59AA0DD3856", ConverterParaJSON<Object>(jogo));
+      var erroEmJson = await retorno.Content.ReadAsStringAsync();
+      var erro = Converter<Dictionary<string, string>>(erroEmJson);
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.NotFound);
+      retorno.StatusCode.Should().Be(404);
+      erro["mensagem"].Should().Be("Jogo não encontrado(a)!");
     }
 
     [Fact]
     public async Task Deve_Notificar_O_Usuario_Quando_Tentar_Atualizar_Um_Jogo_Com_Nome_Em_Branco()
     {
+      var jogo = new
+      {
+        Nome = "   ",
+        Preco = 352.21,
+        Categoria = "Esportes"
+      };
+
+      var retorno = await _api.PutAsync("/api/V1/jogos/A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9", ConverterParaJSON<Object>(jogo));
+      var mensagemEmJson = await retorno.Content.ReadAsStringAsync();
+      var mensagem = Converter<Dictionary<string, object>>(mensagemEmJson);
+      var errosEmJson = mensagem["errors"].ToString();
+      var erros = Converter<Dictionary<string, string[]>>(errosEmJson)["Nome"];
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+      erros[0].Should().Be("Não é possível salvar um jogo com nome em branco.");
     }
 
     [Fact]
     public async Task Deve_Notificar_O_Usuario_Quando_Tentar_Atualizar_Um_Jogo_Com_Preco_Invalido()
     {
+      var jogo = new
+      {
+        Nome = "FIFA 22",
+        Preco = -1,
+        Categoria = "Esportes"
+      };
+
+      var retorno = await _api.PutAsync("/api/V1/jogos/A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9", ConverterParaJSON<Object>(jogo));
+      var mensagemEmJson = await retorno.Content.ReadAsStringAsync();
+      var mensagem = Converter<Dictionary<string, object>>(mensagemEmJson);
+      var errosEmJson = mensagem["errors"].ToString();
+      var erros = Converter<Dictionary<string, string[]>>(errosEmJson)["Preco"];
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+      erros[0].Should().Be("O preço do jogo precisa ser maior do que 0.");
     }
 
     [Fact]

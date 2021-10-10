@@ -12,7 +12,7 @@ namespace DIO.CatalogoJogos.Api.Repositorios
     {
       new Modelos.Jogo("FIFA 21", 288.29, "Esportes", new Produtora("EA Sports") { Id = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") })
       { Id = Guid.Parse("A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9"), ProdutoraId = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") },
-      new Modelos.Jogo("FIFA 21", 288.29, "Esportes", new Produtora("EA Sports") { Id = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") })
+      new Modelos.Jogo("FIFA 22", 288.29, "Esportes", new Produtora("EA Sports") { Id = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") })
       { Id = Guid.Parse("A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9"), ProdutoraId = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") },
       new Modelos.Jogo("FIFA 21", 288.29, "Esportes", new Produtora("EA Sports") { Id = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") })
       { Id = Guid.Parse("A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9"), ProdutoraId = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") },
@@ -27,18 +27,23 @@ namespace DIO.CatalogoJogos.Api.Repositorios
 
     public Task<Jogo> ObterPorNomeEProdutoraId(string nome, Guid produtoraId)
     {
-      return Task.FromResult(_jogos.FirstOrDefault(x => x.Nome.Equals(nome) && x.ProdutoraId == produtoraId));
+      return Task.FromResult(_jogos.FirstOrDefault(x => x.Nome.Equals(nome) && x.Produtora.Id == produtoraId));
     }
 
     public Task<List<Jogo>> Listar(int pagina, int quantidade, Guid? produtoraId)
     {
       if (produtoraId != Guid.Empty)
-        return Task.FromResult(_jogos.Where(x => x.ProdutoraId == produtoraId).Skip((pagina - 1) * quantidade).Take(quantidade).ToList());
+        return Task.FromResult(_jogos.Where(x => x.Produtora.Id == produtoraId).Skip((pagina - 1) * quantidade).Take(quantidade).ToList());
 
       return Task.FromResult(_jogos.Skip((pagina - 1) * quantidade).Take(quantidade).ToList());
     }
 
     public Task<Jogo> ObterPorId(Guid id) => Task.FromResult(_jogos.FirstOrDefault(x => x.Id == id));
+
+    public Task Atualizar(Jogo jogo)
+    {
+      return Task.FromResult(jogo);
+    }
 
     public void Dispose()
     {

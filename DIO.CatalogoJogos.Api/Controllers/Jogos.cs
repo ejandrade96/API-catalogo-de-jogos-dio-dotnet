@@ -63,13 +63,24 @@ namespace DIO.CatalogoJogos.Api.Controllers
     public async Task<ActionResult<DTOs.Jogo>> ObterPorId(Guid id)
     {
       var resposta = await _servico.ObterPorId(id);
-      
+
       if (resposta.TemErro())
         return StatusCode(resposta.Erro.StatusCode, new { Mensagem = resposta.Erro.Mensagem });
 
       var jogo = resposta.Resultado;
 
       return Ok(jogo);
+    }
+
+    [HttpPut("api/V1/jogos/{id}")]
+    public async Task<ActionResult> Atualizar([FromBody] DTOs.JogoInputModel dadosJogo, Guid id)
+    {
+      var resposta = await _servico.Atualizar(dadosJogo, id);
+      
+      if (resposta.TemErro())
+        return StatusCode(resposta.Erro.StatusCode, new { Mensagem = resposta.Erro.Mensagem });
+
+      return NoContent();
     }
   }
 }
