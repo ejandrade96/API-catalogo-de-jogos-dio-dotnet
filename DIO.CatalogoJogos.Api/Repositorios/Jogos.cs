@@ -38,6 +38,8 @@ namespace DIO.CatalogoJogos.Api.Repositorios
       return Task.FromResult(_jogos.Skip((pagina - 1) * quantidade).Take(quantidade).ToList());
     }
 
+    public Task<Jogo> ObterPorId(Guid id) => Task.FromResult(_jogos.FirstOrDefault(x => x.Id == id));
+
     public void Dispose()
     {
     }

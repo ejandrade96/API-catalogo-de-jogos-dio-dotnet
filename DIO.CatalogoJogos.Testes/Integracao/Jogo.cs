@@ -134,6 +134,8 @@ namespace DIO.CatalogoJogos.Testes.Integracao
       {
         jogo.Should().ContainKey("id");
         jogo.Should().ContainKey("nome");
+        jogo.Should().ContainKey("preco");
+        jogo.Should().ContainKey("categoria");
         jogo["id"].ToString().Should().NotBeNullOrWhiteSpace();
         jogo["id"].ToString().ToCharArray().Should().HaveCount(36);
         jogo["nome"].ToString().Should().NotBeNullOrWhiteSpace();
@@ -158,11 +160,32 @@ namespace DIO.CatalogoJogos.Testes.Integracao
     [Fact]
     public async Task Deve_Retornar_Um_Jogo_Por_Id()
     {
+      var retorno = await _api.GetAsync("/api/V1/jogos/A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9");
+      var jogoEmJson = await retorno.Content.ReadAsStringAsync();
+      var jogo = Converter<Dictionary<string, object>>(jogoEmJson);
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.OK);
+      jogo.Should().ContainKey("id");
+      jogo.Should().ContainKey("nome");
+      jogo.Should().ContainKey("preco");
+      jogo.Should().ContainKey("categoria");
+      jogo["id"].ToString().Should().NotBeNullOrWhiteSpace();
+      jogo["id"].ToString().ToCharArray().Should().HaveCount(36);
+      jogo["nome"].ToString().Should().NotBeNullOrWhiteSpace();
+      jogo["preco"].ToString().Should().NotBeNullOrWhiteSpace();
+      jogo["categoria"].ToString().Should().NotBeNullOrWhiteSpace();
     }
 
     [Fact]
     public async Task Deve_Notificar_O_Usuario_Quando_Tentar_Buscar_Um_Jogo_Inexistente_Por_Id()
     {
+      var retorno = await _api.GetAsync("/api/V1/jogos/39D40DA2-3DD9-4A0C-9BE0-F59AA0DD3856");
+      var erroEmJson = await retorno.Content.ReadAsStringAsync();
+      var erro = Converter<Dictionary<string, string>>(erroEmJson);
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.NotFound);
+      retorno.StatusCode.Should().Be(404);
+      erro["mensagem"].Should().Be("Jogo não encontrado(a)!");
     }
 
     [Fact]

@@ -162,5 +162,33 @@ namespace DIO.CatalogoJogos.Testes.Unidade.Servicos
       resposta.Erro.StatusCode.Should().Be(404);
       resposta.Erro.GetType().Should().Be(typeof(ErroObjetoNaoEncontrado));
     }
+
+    [Fact]
+    public async Task Deve_Retornar_Um_Jogo_Por_Id()
+    {
+      var produtora = new Modelos.Produtora("EA Sports") { Id = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") };
+      var jogo = new Modelos.Jogo("FIFA 20", 78.29, "Esportes", produtora) { Id = Guid.NewGuid() };
+      var dadosJogo = new DTOs.Jogo { Id = Guid.NewGuid(), Nome = "FIFA 20", Preco = 78.29, Categoria = "Esportes" };
+
+      _jogos.Setup(repository => repository.ObterPorId(jogo.Id)).Returns(Task.FromResult<Modelos.Jogo>(jogo));
+      _mapper.Setup(mapper => mapper.Map<DTOs.Jogo>(jogo)).Returns(dadosJogo);
+      
+      var resposta = await _servico.ObterPorId(jogo.Id);
+      var jogoEncontrado = resposta.Resultado;
+
+      resposta.Erro.Should().BeNull();
+      jogoEncontrado.Should().NotBeNull();
+      jogoEncontrado.Id.Should().NotBe(Guid.Empty);
+    }
+
+    [Fact]
+    public async Task Deve_Notificar_O_Usuario_Quando_Tentar_Buscar_Um_Jogo_Inexistente_Por_Id()
+    {
+      var resposta = await _servico.ObterPorId(Guid.NewGuid());
+
+      resposta.Erro.Mensagem.Should().Be("Jogo não encontrado(a)!");
+      resposta.Erro.StatusCode.Should().Be(404);
+      resposta.Erro.GetType().Should().Be(typeof(ErroObjetoNaoEncontrado));
+    }
   }
 }
