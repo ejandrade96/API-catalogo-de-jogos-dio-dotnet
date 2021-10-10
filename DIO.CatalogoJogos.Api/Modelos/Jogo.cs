@@ -28,5 +28,10 @@ namespace DIO.CatalogoJogos.Api.Modelos
       Preco = jogo.Preco;
       Categoria = jogo.Categoria;
     }
+
+    public void AtualizarNome(string nome)
+    {
+      Nome = nome;
+    }
   }
 }

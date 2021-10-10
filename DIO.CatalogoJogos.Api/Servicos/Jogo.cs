@@ -133,6 +133,24 @@ namespace DIO.CatalogoJogos.Api.Servicos
       return resposta;
     }
 
+    public async Task<IResposta<DTOs.Jogo>> Atualizar(string nome, Guid id)
+    {
+      IResposta<DTOs.Jogo> resposta = new Resposta<DTOs.Jogo>();
+
+      var jogo = await _jogos.ObterPorId(id);
+
+      if (jogo == null)
+        resposta.Erro = new ErroObjetoNaoEncontrado("Jogo");
+      
+      else
+      {
+        jogo.AtualizarNome(nome);
+        await _jogos.Atualizar(jogo);
+      }
+
+      return resposta;
+    }
+
     public void Dispose() => _jogos?.Dispose();
   }
 }

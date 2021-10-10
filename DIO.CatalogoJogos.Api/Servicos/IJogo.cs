@@ -16,5 +16,7 @@ namespace DIO.CatalogoJogos.Api.Servicos
     Task<IResposta<DTOs.Jogo>> Atualizar(JogoInputModel dadosJogo, Guid id);
 
     Task<IResposta<DTOs.Jogo>> Remover(Guid id);
+
+    Task<IResposta<DTOs.Jogo>> Atualizar(string nome, Guid id);
   }
 }

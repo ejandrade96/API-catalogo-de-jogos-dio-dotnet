@@ -272,5 +272,28 @@ namespace DIO.CatalogoJogos.Testes.Unidade.Servicos
       resposta.Erro.StatusCode.Should().Be(404);
       resposta.Erro.GetType().Should().Be(typeof(ErroObjetoNaoEncontrado));
     }
+
+    [Fact]
+    public async Task Deve_Atualizar_O_Nome_De_Um_Jogo_Quando_Enviar_Dados_Certos()
+    {
+      var produtora = new Modelos.Produtora("EA Sports") { Id = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") };
+      var jogo = new Modelos.Jogo("FIFA 20", 78.29, "Esportes", produtora) { Id = Guid.NewGuid() };
+
+      _jogos.Setup(repository => repository.ObterPorId(jogo.Id)).Returns(Task.FromResult<Modelos.Jogo>(jogo));
+
+      var resposta = await _servico.Atualizar("FIFA 23", jogo.Id);
+
+      resposta.Erro.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Deve_Notificar_O_Usuario_Quando_Tentar_Atualizar_O_Nome_De_Um_Jogo_Inexistente()
+    {
+      var resposta = await _servico.Atualizar("FIFA 23", Guid.NewGuid());
+
+      resposta.Erro.Mensagem.Should().Be("Jogo não encontrado(a)!");
+      resposta.Erro.StatusCode.Should().Be(404);
+      resposta.Erro.GetType().Should().Be(typeof(ErroObjetoNaoEncontrado));
+    }
   }
 }

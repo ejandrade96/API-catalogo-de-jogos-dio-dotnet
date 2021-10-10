@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -265,13 +266,34 @@ namespace DIO.CatalogoJogos.Testes.Integracao
     [Fact]
     public async Task Deve_Atualizar_O_Nome_De_Um_Jogo_Quando_Enviar_Dados_Certos()
     {
-      //Patch
+      var retorno = await _api.PatchAsync("/api/V1/jogos/A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9/nome", ConverterParaJSON<string>("FIFA 23"));
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact]
     public async Task Deve_Notificar_O_Usuario_Quando_Tentar_Atualizar_O_Nome_De_Um_Jogo_E_Enviar_O_Dado_Em_Branco()
     {
-      //Patch
+      var retorno = await _api.PatchAsync("/api/V1/jogos/A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9/nome", ConverterParaJSON<string>("   "));
+      var mensagemEmJson = await retorno.Content.ReadAsStringAsync();
+      var mensagem = Converter<Dictionary<string, object>>(mensagemEmJson);
+      var errosEmJson = mensagem["errors"].ToString();
+      var erros = Converter<Dictionary<string, string[]>>(errosEmJson).Values.ElementAt(0);
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+      erros[0].Should().Be("Não é possível salvar um jogo com nome em branco.");
+    }
+
+    [Fact]
+    public async Task Deve_Notificar_O_Usuario_Quando_Tentar_Atualizar_O_Nome_De_Um_Jogo_Inexistente()
+    {
+      var retorno = await _api.PatchAsync("/api/V1/jogos/39D40DA2-3DD9-4A0C-9BE0-F59AA0DD3856/nome", ConverterParaJSON<string>("FIFA 23"));
+      var erroEmJson = await retorno.Content.ReadAsStringAsync();
+      var erro = Converter<Dictionary<string, string>>(erroEmJson);
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.NotFound);
+      retorno.StatusCode.Should().Be(404);
+      erro["mensagem"].Should().Be("Jogo não encontrado(a)!");
     }
 
     [Fact]
