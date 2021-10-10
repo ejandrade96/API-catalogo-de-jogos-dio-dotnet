@@ -93,5 +93,16 @@ namespace DIO.CatalogoJogos.Api.Controllers
 
       return NoContent();
     }
+
+    [HttpPatch("api/V1/jogos/{id:guid}/nome")]
+    public async Task<ActionResult> Atualizar([FromBody, Required(ErrorMessage = "Não é possível salvar um jogo com nome em branco.", AllowEmptyStrings = false)] string nome, Guid id)
+    {
+      var resposta = await _servico.Atualizar(nome, id);
+      
+      if (resposta.TemErro())
+        return StatusCode(resposta.Erro.StatusCode, new { Mensagem = resposta.Erro.Mensagem });
+
+      return NoContent();
+    }
   }
 }
