@@ -33,8 +33,8 @@ namespace DIO.CatalogoJogos.Api.Controllers
     }
 
     [HttpGet("api/V1/produtoras/{produtoraId}/jogos")]
-    public async Task<ActionResult<List<DTOs.Jogo>>> ListarPorProdutora(Guid produtoraId, 
-                                                                        [FromQuery, Range(1, int.MaxValue)] int pagina = 1, 
+    public async Task<ActionResult<List<DTOs.Jogo>>> ListarPorProdutora(Guid produtoraId,
+                                                                        [FromQuery, Range(1, int.MaxValue)] int pagina = 1,
                                                                         [FromQuery, Range(1, 50, ErrorMessage = "O limite máximo deve ser de {2} jogos por página.")] int quantidade = 5)
     {
       var resposta = await _servico.Listar(pagina, quantidade, produtoraId);
@@ -42,12 +42,12 @@ namespace DIO.CatalogoJogos.Api.Controllers
 
       if (resposta.TemErro())
         return StatusCode(resposta.Erro.StatusCode, new { Mensagem = resposta.Erro.Mensagem });
-      
+
       return Ok(jogos);
     }
 
     [HttpGet("api/V1/jogos")]
-    public async Task<ActionResult<List<DTOs.Jogo>>> Listar([FromQuery, Range(1, int.MaxValue)] int pagina = 1, 
+    public async Task<ActionResult<List<DTOs.Jogo>>> Listar([FromQuery, Range(1, int.MaxValue)] int pagina = 1,
                                                             [FromQuery, Range(1, 50, ErrorMessage = "O limite máximo deve ser de {2} jogos por página.")] int quantidade = 5)
     {
       var resposta = await _servico.Listar(pagina, quantidade, Guid.Empty);
@@ -55,8 +55,21 @@ namespace DIO.CatalogoJogos.Api.Controllers
 
       if (resposta.TemErro())
         return StatusCode(resposta.Erro.StatusCode, new { Mensagem = resposta.Erro.Mensagem });
-      
+
       return Ok(jogos);
+    }
+
+    [HttpGet("api/V1/jogos/{id}")]
+    public async Task<ActionResult<DTOs.Jogo>> ObterPorId(Guid id)
+    {
+      var resposta = await _servico.ObterPorId(id);
+      
+      if (resposta.TemErro())
+        return StatusCode(resposta.Erro.StatusCode, new { Mensagem = resposta.Erro.Mensagem });
+
+      var jogo = resposta.Resultado;
+
+      return Ok(jogo);
     }
   }
 }

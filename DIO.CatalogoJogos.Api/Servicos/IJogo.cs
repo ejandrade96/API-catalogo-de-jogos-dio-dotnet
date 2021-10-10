@@ -10,5 +10,7 @@ namespace DIO.CatalogoJogos.Api.Servicos
     Task<IResposta<DTOs.Jogo>> Inserir(JogoInputModel dadosJogo, Guid produtoraId);
 
     Task<IResposta<List<DTOs.Jogo>>> Listar(int pagina, int quantidade, Guid? produtoraId);
+
+    Task<IResposta<DTOs.Jogo>> ObterPorId(Guid id);
   }
 }

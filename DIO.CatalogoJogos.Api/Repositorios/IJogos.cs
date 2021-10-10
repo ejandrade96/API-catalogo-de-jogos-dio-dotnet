@@ -13,6 +13,8 @@ namespace DIO.CatalogoJogos.Api.Repositorios
 
     Task<List<Jogo>> Listar(int pagina, int quantidade, Guid? produtoraId);
 
+    Task<Jogo> ObterPorId(Guid id);
+
     /* public void Dispose()
      {
           sqlConnection?.Close();
