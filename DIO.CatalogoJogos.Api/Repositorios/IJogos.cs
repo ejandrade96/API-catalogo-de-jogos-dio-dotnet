@@ -15,6 +15,8 @@ namespace DIO.CatalogoJogos.Api.Repositorios
 
     Task<Jogo> ObterPorId(Guid id);
 
+    Task Atualizar(Jogo jogo);
+
     /* public void Dispose()
      {
           sqlConnection?.Close();

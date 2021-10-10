@@ -92,6 +92,32 @@ namespace DIO.CatalogoJogos.Api.Servicos
       return resposta;
     }
 
+    public async Task<IResposta<DTOs.Jogo>> Atualizar(JogoInputModel dadosJogo, Guid id)
+    {
+      IResposta<DTOs.Jogo> resposta = new Resposta<DTOs.Jogo>();
+
+      var jogo = await _jogos.ObterPorId(id);
+
+      if (jogo == null)
+      {
+        resposta.Erro = new ErroObjetoNaoEncontrado("Jogo");
+        return resposta;
+      }
+
+      var jogoRepetido = await _jogos.ObterPorNomeEProdutoraId(dadosJogo.Nome, jogo.Produtora.Id);
+
+      if (jogoRepetido != null && jogoRepetido.Id != id)
+        resposta.Erro = new ErroObjetoExistente("Jogo", "nome");
+
+      else
+      {
+        jogo.Atualizar(dadosJogo);
+        await _jogos.Atualizar(jogo);
+      }
+
+      return resposta;
+    }
+
     public void Dispose() => _jogos?.Dispose();
   }
 }

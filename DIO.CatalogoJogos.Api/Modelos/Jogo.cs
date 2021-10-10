@@ -21,5 +21,12 @@ namespace DIO.CatalogoJogos.Api.Modelos
       Categoria = categoria;
       Produtora = produtora;
     }
+
+    public void Atualizar(DTOs.JogoInputModel jogo)
+    {
+      Nome = jogo.Nome;
+      Preco = jogo.Preco;
+      Categoria = jogo.Categoria;
+    }
   }
 }

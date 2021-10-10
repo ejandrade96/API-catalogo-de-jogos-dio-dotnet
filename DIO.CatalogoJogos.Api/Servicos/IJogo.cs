@@ -12,5 +12,7 @@ namespace DIO.CatalogoJogos.Api.Servicos
     Task<IResposta<List<DTOs.Jogo>>> Listar(int pagina, int quantidade, Guid? produtoraId);
 
     Task<IResposta<DTOs.Jogo>> ObterPorId(Guid id);
+
+    Task<IResposta<DTOs.Jogo>> Atualizar(JogoInputModel dadosJogo, Guid id);
   }
 }
