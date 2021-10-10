@@ -277,11 +277,21 @@ namespace DIO.CatalogoJogos.Testes.Integracao
     [Fact]
     public async Task Deve_Deletar_Um_Jogo()
     {
+      var retorno = await _api.DeleteAsync("/api/V1/jogos/A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9");
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact]
     public async Task Deve_Notificar_O_Usuario_Quando_Tentar_Deletar_Um_Jogo_Inexistente()
     {
+      var retorno = await _api.DeleteAsync("/api/V1/jogos/39D40DA2-3DD9-4A0C-9BE0-F59AA0DD3856");
+      var erroEmJson = await retorno.Content.ReadAsStringAsync();
+      var erro = Converter<Dictionary<string, string>>(erroEmJson);
+
+      retorno.StatusCode.Should().Be(HttpStatusCode.NotFound);
+      retorno.StatusCode.Should().Be(404);
+      erro["mensagem"].Should().Be("Jogo não encontrado(a)!");
     }
   }
 }

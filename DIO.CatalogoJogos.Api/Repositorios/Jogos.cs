@@ -45,6 +45,13 @@ namespace DIO.CatalogoJogos.Api.Repositorios
       return Task.FromResult(jogo);
     }
 
+    public async Task Remover(Guid id)
+    {
+      var jogo = await ObterPorId(id);
+
+      await Task.Run(() => _jogos.Remove(jogo));
+    }
+
     public void Dispose()
     {
     }
