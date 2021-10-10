@@ -118,6 +118,21 @@ namespace DIO.CatalogoJogos.Api.Servicos
       return resposta;
     }
 
+    public async Task<IResposta<DTOs.Jogo>> Remover(Guid id)
+    {
+      IResposta<DTOs.Jogo> resposta = new Resposta<DTOs.Jogo>();
+
+      var jogo = await _jogos.ObterPorId(id);
+
+      if (jogo == null)
+        resposta.Erro = new ErroObjetoNaoEncontrado("Jogo");
+
+      else
+        await _jogos.Remover(id);
+
+      return resposta;
+    }
+
     public void Dispose() => _jogos?.Dispose();
   }
 }
