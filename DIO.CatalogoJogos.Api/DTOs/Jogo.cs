@@ -11,5 +11,7 @@ namespace DIO.CatalogoJogos.Api.DTOs
     public double Preco { get; set; }
 
     public string Categoria { get; set; }
+
+    public Guid ProdutoraId { get; set; }
   }
 }
