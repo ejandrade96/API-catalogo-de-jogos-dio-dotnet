@@ -15,7 +15,7 @@ namespace DIO.CatalogoJogos.Testes.Integracao
     {
       var jogo = new
       {
-        Nome = "FIFA 25",
+        Nome = "FIFA 23",
         Preco = 288.29,
         Categoria = "Esportes"
       };
@@ -194,8 +194,8 @@ namespace DIO.CatalogoJogos.Testes.Integracao
     {
       var jogo = new
       {
-        Nome = "FIFA 23",
-        Preco = 352.21,
+        Nome = "FIFA 21",
+        Preco = 140.54,
         Categoria = "Esportes"
       };
 
@@ -299,7 +299,7 @@ namespace DIO.CatalogoJogos.Testes.Integracao
     [Fact]
     public async Task Deve_Deletar_Um_Jogo()
     {
-      var retorno = await _api.DeleteAsync("/api/V1/jogos/A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9");
+      var retorno = await _api.DeleteAsync("/api/V1/jogos/18214600-A5A1-4D21-A9E2-DA9DC817AB0F");
 
       retorno.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }

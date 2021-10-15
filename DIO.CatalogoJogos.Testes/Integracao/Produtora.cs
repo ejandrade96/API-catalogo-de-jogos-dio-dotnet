@@ -144,7 +144,7 @@ namespace DIO.CatalogoJogos.Testes.Integracao
     [Fact]
     public async Task Deve_Deletar_Uma_Produtora()
     {
-      var retorno = await _api.DeleteAsync("/api/V1/produtoras/C8133002-F17A-465D-905B-F2EA6B69AF9B");
+      var retorno = await _api.DeleteAsync("/api/V1/produtoras/69BBD13A-FC21-40FF-8925-A31A4A6C21CD");
 
       retorno.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }

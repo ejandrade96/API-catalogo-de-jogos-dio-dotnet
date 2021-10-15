@@ -42,7 +42,7 @@ namespace DIO.CatalogoJogos.Api.Servicos
 
       else
       {
-        var jogo = new Modelos.Jogo(dadosJogo.Nome, dadosJogo.Preco, dadosJogo.Categoria, produtora);
+        var jogo = new Modelos.Jogo(dadosJogo.Nome, dadosJogo.Preco, dadosJogo.Categoria, produtora) { Id = Guid.NewGuid() };
 
         var jogoCadastrado = await _jogos.Inserir(jogo);
 
@@ -104,7 +104,7 @@ namespace DIO.CatalogoJogos.Api.Servicos
         return resposta;
       }
 
-      var jogoRepetido = await _jogos.ObterPorNomeEProdutoraId(dadosJogo.Nome, jogo.Produtora.Id);
+      var jogoRepetido = await _jogos.ObterPorNomeEProdutoraId(dadosJogo.Nome, jogo.ProdutoraId);
 
       if (jogoRepetido != null && jogoRepetido.Id != id)
         resposta.Erro = new ErroObjetoExistente("Jogo", "nome");
