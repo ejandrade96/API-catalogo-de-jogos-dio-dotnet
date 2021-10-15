@@ -12,7 +12,7 @@ namespace DIO.CatalogoJogos.Api.Controllers
   public class Produtoras : ControllerBase
   {
     private readonly IProdutora _servico;
-    
+
     public Produtoras(IProdutora servico)
     {
       _servico = servico;
@@ -37,7 +37,7 @@ namespace DIO.CatalogoJogos.Api.Controllers
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<DTOs.Produtora>> ObterPorId(Guid id)
+    public async Task<ActionResult<DTOs.Produtora>> ObterPorId([FromRoute] Guid id)
     {
       var resposta = await _servico.ObterPorId(id);
 
@@ -48,7 +48,7 @@ namespace DIO.CatalogoJogos.Api.Controllers
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult> Atualizar(Guid id, [FromBody] DTOs.ProdutoraInputModel dadosProdutora)
+    public async Task<ActionResult> Atualizar([FromRoute] Guid id, [FromBody] DTOs.ProdutoraInputModel dadosProdutora)
     {
       var resposta = await _servico.Atualizar(id, dadosProdutora);
 
@@ -60,7 +60,7 @@ namespace DIO.CatalogoJogos.Api.Controllers
 
 
     [HttpDelete("{id:guid}")]
-    public async Task<ActionResult> Remover(Guid id)
+    public async Task<ActionResult> Remover([FromRoute] Guid id)
     {
       var resposta = await _servico.Remover(id);
 
