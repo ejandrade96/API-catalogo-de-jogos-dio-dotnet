@@ -22,7 +22,7 @@ namespace DIO.CatalogoJogos.Api.Servicos
 
     public async Task<DTOs.Produtora> Inserir(ProdutoraInputModel dadosProdutora)
     {
-      var produtora = new Modelos.Produtora(dadosProdutora.Nome);
+      var produtora = new Modelos.Produtora(dadosProdutora.Nome) { Id = Guid.NewGuid() };
 
       var produtoraCadastrada = await _produtoras.Inserir(produtora);
 

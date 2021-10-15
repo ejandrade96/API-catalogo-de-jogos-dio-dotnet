@@ -2,52 +2,71 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dapper;
 using DIO.CatalogoJogos.Api.Modelos;
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
 
 namespace DIO.CatalogoJogos.Api.Repositorios
 {
   public class Produtoras : IProdutoras
   {
-    private readonly List<Produtora> _produtoras = new List<Produtora>
-    {
-      new Produtora("EA Sports") { Id = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") }
-    };
+    private readonly IConfiguration _config;
 
-    public Task<Produtora> Inserir(Produtora produtora)
+    private readonly string _connectionString;
+
+    private readonly SqliteConnection _sqliteConnection;
+
+    public Produtoras(IConfiguration config)
     {
-      return Task.FromResult(_produtoras.First());
+      _config = config;
+      _connectionString = $"Data Source={System.IO.Directory.GetCurrentDirectory()}/{_config.GetConnectionString("SqliteConnection")}";
+      _sqliteConnection = new SqliteConnection(_connectionString);
     }
 
-    public Task<List<Produtora>> Listar()
+    public async Task<Produtora> Inserir(Produtora produtora)
     {
-      return Task.FromResult(_produtoras);
+      await _sqliteConnection.ExecuteAsync("insert into Produtoras (Id, Nome) values (@Id, @Nome)", produtora);
+      await _sqliteConnection.CloseAsync();
+      return produtora;
     }
-    
-    public Task<Produtora> ObterPorId(Guid id)
+
+    public async Task<List<Produtora>> Listar()
     {
-      return Task.FromResult(_produtoras.FirstOrDefault(x => x.Id.Equals(id)));
+      var produtoras = (await _sqliteConnection.QueryAsync("SELECT * FROM Produtoras")).Select(produtora => new Produtora(produtora.Nome) { Id = Guid.Parse((string)produtora.Id) }).ToList();
+      await _sqliteConnection.CloseAsync();
+      return produtoras;
+    }
+
+    public async Task<Produtora> ObterPorId(Guid id)
+    {
+      var produtora = await _sqliteConnection.QueryFirstOrDefaultAsync($"SELECT * FROM Produtoras WHERE UPPER(ID) = UPPER('{id}')");
+      await _sqliteConnection.CloseAsync();
+      return produtora != null ? new Produtora(produtora.Nome) { Id = Guid.Parse((string)produtora.Id) } : null;
     }
 
     public async Task Atualizar(Produtora produtora)
     {
-      await Task.Run(() =>
+      await Task.Run(async () =>
       {
-        _produtoras[0] = produtora;
+        _ = await _sqliteConnection.ExecuteAsync($"UPDATE Produtoras SET Nome = '{produtora.Nome}' WHERE UPPER(ID) = UPPER('{produtora.Id}')");
+        await _sqliteConnection.CloseAsync();
       });
     }
 
     public async Task Remover(Guid id)
     {
-      var produtora = await ObterPorId(id);
-
-      await Task.Run(() =>
+      await Task.Run(async () =>
       {
-        _produtoras.Remove(produtora);
+        _ = await _sqliteConnection.ExecuteAsync($"DELETE FROM Produtoras WHERE UPPER(ID) = UPPER('{id}')");
+        await _sqliteConnection.CloseAsync();
       });
     }
 
     public void Dispose()
     {
+      _sqliteConnection?.Close();
+      _sqliteConnection?.Dispose();
     }
   }
 }
