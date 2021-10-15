@@ -26,7 +26,7 @@ namespace DIO.CatalogoJogos.Api.Repositorios
 
     public async Task<Produtora> Inserir(Produtora produtora)
     {
-      await _sqliteConnection.ExecuteAsync("insert into Produtoras (Id, Nome) values (@Id, @Nome)", produtora);
+      await _sqliteConnection.ExecuteAsync("INSERT INTO Produtoras (ID, NOME) VALUES (@Id, @Nome)", produtora);
       await _sqliteConnection.CloseAsync();
       return produtora;
     }
@@ -42,25 +42,19 @@ namespace DIO.CatalogoJogos.Api.Repositorios
     {
       var produtora = await _sqliteConnection.QueryFirstOrDefaultAsync($"SELECT * FROM Produtoras WHERE UPPER(ID) = UPPER('{id}')");
       await _sqliteConnection.CloseAsync();
-      return produtora != null ? new Produtora(produtora.Nome) { Id = Guid.Parse((string)produtora.Id) } : null;
+      return produtora != null ? new Produtora((string)produtora.Nome) { Id = Guid.Parse((string)produtora.Id) } : null;
     }
 
     public async Task Atualizar(Produtora produtora)
     {
-      await Task.Run(async () =>
-      {
-        _ = await _sqliteConnection.ExecuteAsync($"UPDATE Produtoras SET Nome = '{produtora.Nome}' WHERE UPPER(ID) = UPPER('{produtora.Id}')");
-        await _sqliteConnection.CloseAsync();
-      });
+      _ = await _sqliteConnection.ExecuteAsync($"UPDATE Produtoras SET Nome = '{produtora.Nome}' WHERE UPPER(ID) = UPPER('{produtora.Id}')");
+      await _sqliteConnection.CloseAsync();
     }
 
     public async Task Remover(Guid id)
     {
-      await Task.Run(async () =>
-      {
-        _ = await _sqliteConnection.ExecuteAsync($"DELETE FROM Produtoras WHERE UPPER(ID) = UPPER('{id}')");
-        await _sqliteConnection.CloseAsync();
-      });
+      _ = await _sqliteConnection.ExecuteAsync($"DELETE FROM Produtoras WHERE UPPER(ID) = UPPER('{id}')");
+      await _sqliteConnection.CloseAsync();
     }
 
     public void Dispose()

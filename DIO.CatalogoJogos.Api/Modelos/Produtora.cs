@@ -9,10 +9,6 @@ namespace DIO.CatalogoJogos.Api.Modelos
       Nome = nome;
     }
 
-    protected Produtora()
-    {
-    }
-
     public void AtualizarNome(string nome)
     {
       Nome = nome;

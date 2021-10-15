@@ -2,58 +2,83 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dapper;
 using DIO.CatalogoJogos.Api.Modelos;
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
 
 namespace DIO.CatalogoJogos.Api.Repositorios
 {
   public class Jogos : IJogos
   {
-    private readonly List<Jogo> _jogos = new List<Jogo>
-    {
-      new Modelos.Jogo("FIFA 21", 288.29, "Esportes", new Produtora("EA Sports") { Id = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") })
-      { Id = Guid.Parse("A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9"), ProdutoraId = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") },
-      new Modelos.Jogo("FIFA 22", 288.29, "Esportes", new Produtora("EA Sports") { Id = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") })
-      { Id = Guid.Parse("A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9"), ProdutoraId = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") },
-      new Modelos.Jogo("FIFA 21", 288.29, "Esportes", new Produtora("EA Sports") { Id = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") })
-      { Id = Guid.Parse("A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9"), ProdutoraId = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") },
-      new Modelos.Jogo("FIFA 21", 288.29, "Esportes", new Produtora("EA Sports") { Id = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") })
-      { Id = Guid.Parse("A4C69C2F-D2CA-4D03-AFD7-6022400DB8E9"), ProdutoraId = Guid.Parse("C8133002-F17A-465D-905B-F2EA6B69AF9B") }
-    };
+    private readonly IConfiguration _config;
 
-    public Task<Jogo> Inserir(Jogo jogo)
+    private readonly string _connectionString;
+
+    private readonly SqliteConnection _sqliteConnection;
+
+    public Jogos(IConfiguration config)
     {
-      return Task.FromResult(_jogos.First());
+      _config = config;
+      _connectionString = $"Data Source={System.IO.Directory.GetCurrentDirectory()}/{_config.GetConnectionString("SqliteConnection")}";
+      _sqliteConnection = new SqliteConnection(_connectionString);
     }
 
-    public Task<Jogo> ObterPorNomeEProdutoraId(string nome, Guid produtoraId)
+    public async Task<Jogo> Inserir(Jogo jogo)
     {
-      return Task.FromResult(_jogos.FirstOrDefault(x => x.Nome.Equals(nome) && x.Produtora.Id == produtoraId));
+      await _sqliteConnection.ExecuteAsync("INSERT INTO Jogos (ID, NOME, PRECO, CATEGORIA, PRODUTORAID) VALUES (@Id, @Nome, @Preco, @Categoria, @ProdutoraId)", jogo);
+      await _sqliteConnection.CloseAsync();
+      return jogo;
     }
 
-    public Task<List<Jogo>> Listar(int pagina, int quantidade, Guid? produtoraId)
+    public async Task<Jogo> ObterPorNomeEProdutoraId(string nome, Guid produtoraId)
     {
+      var jogo = await _sqliteConnection.QueryFirstOrDefaultAsync($"SELECT * FROM Jogos WHERE UPPER(ProdutoraId) = UPPER('{produtoraId}') AND UPPER(NOME) = UPPER('{nome}')");
+      await _sqliteConnection.CloseAsync();
+      return jogo != null ? ToModel(jogo) : null;
+    }
+
+    public async Task<List<Jogo>> Listar(int pagina, int quantidade, Guid? produtoraId)
+    {
+      var query = "";
+
       if (produtoraId != Guid.Empty)
-        return Task.FromResult(_jogos.Where(x => x.Produtora.Id == produtoraId).Skip((pagina - 1) * quantidade).Take(quantidade).ToList());
+        query = $"SELECT * FROM Jogos WHERE UPPER(ProdutoraId) = UPPER('{produtoraId.Value}') ORDER BY ID LIMIT {quantidade} OFFSET {((pagina - 1) * quantidade)}";
 
-      return Task.FromResult(_jogos.Skip((pagina - 1) * quantidade).Take(quantidade).ToList());
+      else
+        query = $"SELECT * FROM Jogos ORDER BY ID LIMIT {quantidade} OFFSET {((pagina - 1) * quantidade)}"; ;
+
+      var jogos = (await _sqliteConnection.QueryAsync(query) as List<dynamic>).Select<dynamic, Jogo>(jogo => ToModel(jogo)).ToList();
+      await _sqliteConnection.CloseAsync();
+
+      return jogos;
     }
 
-    public Task<Jogo> ObterPorId(Guid id) => Task.FromResult(_jogos.FirstOrDefault(x => x.Id == id));
-
-    public Task Atualizar(Jogo jogo)
+    public async Task<Jogo> ObterPorId(Guid id)
     {
-      return Task.FromResult(jogo);
+      var jogo = await _sqliteConnection.QueryFirstOrDefaultAsync($"SELECT * FROM Jogos WHERE UPPER(ID) = UPPER('{id}')");
+      await _sqliteConnection.CloseAsync();
+      return jogo != null ? ToModel(jogo) : null;
+    }
+
+    public async Task Atualizar(Jogo jogo)
+    {
+      _ = await _sqliteConnection.ExecuteAsync($"UPDATE Jogos SET Nome = '{jogo.Nome}', Preco = '{jogo.Preco}', Categoria = '{jogo.Categoria}' WHERE UPPER(ID) = UPPER('{jogo.Id}')");
+      await _sqliteConnection.CloseAsync();
     }
 
     public async Task Remover(Guid id)
     {
-      var jogo = await ObterPorId(id);
-
-      await Task.Run(() => _jogos.Remove(jogo));
+      _ = await _sqliteConnection.ExecuteAsync($"DELETE FROM Jogos WHERE UPPER(ID) = UPPER('{id}')");
+      await _sqliteConnection.CloseAsync();
     }
+
+    private Jogo ToModel(dynamic jogoTipoDapper) => new Jogo((string)jogoTipoDapper.Nome, Convert.ToDouble(jogoTipoDapper.Preco), (string)jogoTipoDapper.Categoria, Guid.Parse((string)jogoTipoDapper.ProdutoraId)) { Id = Guid.Parse((string)jogoTipoDapper.Id) };
 
     public void Dispose()
     {
+      _sqliteConnection?.Close();
+      _sqliteConnection?.Dispose();
     }
   }
 }
